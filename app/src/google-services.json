@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "475042772670",
+    "firebase_url": "https://predator2-d179e-default-rtdb.firebaseio.com",
+    "project_id": "predator2-d179e",
+    "storage_bucket": "predator2-d179e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:475042772670:android:ddca40c15269292548d0ef",
+        "android_client_info": {
+          "package_name": "com.example.mapas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAG4hRk2Y93gJrody-ufEvI2HgrIjE29s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
