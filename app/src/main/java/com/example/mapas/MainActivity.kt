@@ -1,29 +1,46 @@
 package com.example.mapas
 
-import android.Manifest
-import android.content.pm.PackageManager
+// MainActivity.kt
+
+import android.content.*
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
+import android.os.ResultReceiver
+import android.util.Log
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.widget.Button
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import android.Manifest
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.pm.PackageManager
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.PolylineOptions
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    private val locationPermissionCode = 1
-    private var tracking = false
-    private val route = ArrayList<LatLng>()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+    private lateinit var locationRequest: LocationRequest
+    private var isTracking = false
+    private val JOB_ID = 123
 
-    private var fusedLocationClient: FusedLocationProviderClient? = null
-    private var locationCallback: LocationCallback? = null
-    private var locationRequest: LocationRequest? = null
+    private val pathPoints = mutableListOf<LatLng>()
+
+    companion object {
+        const val LOCATION_UPDATE_ACTION = "com.example.mapas.LOCATION_UPDATE"
+        const val RESULT_RECEIVER = "result_receiver"
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,116 +51,146 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Configuração do LocationRequest
+        val startStopButton: Button = findViewById(R.id.startButton)
+        startStopButton.setOnClickListener {
+            toggleTracking()
+
+            // Atualizar o texto do botão com base no estado atual
+            startStopButton.text = if (isTracking) "Finalizar Atividade" else "Iniciar Atividade"
+        }
+
         locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(3000) // Intervalo inicial em milissegundos
-            .setFastestInterval(1000) // Intervalo mais rápido
+            .setInterval(5000)
+            .setFastestInterval(2000)
 
         locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let {
-                    addLocationToRoute(it)
-                }
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { updateLocation(it) }
             }
         }
 
-        val startButton = findViewById<Button>(R.id.startButton)
-        startButton.setOnClickListener {
-            if (tracking) {
-                // Finalizar o rastreamento
-                tracking = false
-                stopLocationUpdates()
-                startButton.text = "Iniciar Atividade"
+        // Registra o receiver para receber atualizações de localização do serviço
+        val filter = IntentFilter(LOCATION_UPDATE_ACTION)
+        registerReceiver(locationReceiver, filter)
+    }
+
+    private val locationReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val resultReceiver = intent?.getParcelableExtra<ResultReceiver>(RESULT_RECEIVER)
+            val bundle = Bundle()
+
+            if (checkLocationPermission()) {
+                // Obter a localização atual do provedor de localização
+                fusedLocationClient.lastLocation?.addOnSuccessListener { location ->
+                    location?.let {
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        bundle.putParcelable("location", latLng)
+                        resultReceiver?.send(0, bundle)
+
+                        // Atualiza a rota
+                        updateLocation(location)
+                    }
+                }
             } else {
-                // Iniciar o rastreamento
-                tracking = true
-                route.clear()
-                startButton.text = "Finalizar Atividade"
-                startLocationUpdates()
+                // Lida com o caso em que a permissão de localização não foi concedida
+                // Você pode exibir uma solicitação de permissão ou lidar com isso de acordo com sua lógica
+                Log.e("LocationUpdate", "Permissão de localização não concedida")
             }
         }
+    }
+
+    // Verifica se a permissão de localização foi concedida
+    private fun checkLocationPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun toggleTracking() {
+        if (isTracking) {
+            stopTracking()
+            stopJob()
+        } else {
+            startTracking()
+            scheduleJob()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Desregistra o receiver quando a atividade é destruída
+        unregisterReceiver(locationReceiver)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        map.uiSettings.isMyLocationButtonEnabled = true
 
-        if (hasLocationPermission()) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             map.isMyLocationEnabled = true
         } else {
-            requestLocationPermission()
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
-    private fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestLocationPermission() {
-        ActivityCompat.requestPermissions(this, permissions, locationPermissionCode)
-    }
-
-    private fun startLocationUpdates() {
-        if (hasLocationPermission()) {
-            locationRequest?.let { request ->
-                locationCallback?.let { callback ->
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        // Inicia as atualizações de localização
-                        fusedLocationClient?.requestLocationUpdates(request, callback, Looper.getMainLooper())
-                    }
-                }
-            } ?: run {
-                requestLocationPermission()
-            }
-        } else {
-            requestLocationPermission()
+    private fun startTracking() {
+        isTracking = true
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
         }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        Log.d("LocationUpdate", "Tracking Started")
     }
 
-    private fun stopLocationUpdates() {
-        // Para as atualizações de localização
-        locationCallback?.let { fusedLocationClient?.removeLocationUpdates(it) }
+    private fun stopTracking() {
+        isTracking = false
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    private fun addLocationToRoute(location: Location) {
+    private fun updateLocation(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)
-        route.add(latLng)
-
-        val polylineOptions = PolylineOptions().addAll(route)
-        map.addPolyline(polylineOptions)
+        map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+        pathPoints.add(latLng)
+        map.addPolyline(PolylineOptions().addAll(pathPoints))
+        Log.d("LocationUpdate", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == locationPermissionCode) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return
-                }
-                map.isMyLocationEnabled = true
-            }
-        }
+    private fun scheduleJob() {
+        val jobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+
+        // Cancelar o job existente com o mesmo ID
+        jobScheduler.cancel(JOB_ID)
+
+        // Criar um novo job
+        val jobInfo = JobInfo.Builder(JOB_ID, ComponentName(this, LocationJobService::class.java))
+            .setMinimumLatency(5 * 1000)  // Agendar o mais rápido possível (5 segundos)
+            .setPersisted(true)
+            .build()
+
+        jobScheduler.schedule(jobInfo)
+    }
+
+
+    private fun stopJob() {
+        //val jobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        //jobScheduler.cancel(JOB_ID)
+        Log.d("LocationUpdate", "Job Canceled")
     }
 }
+
 
