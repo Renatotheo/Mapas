@@ -89,7 +89,3 @@ class LocationJobService : JobService() {
         sendBroadcast(intent)
     }
 }
-
-
-
-

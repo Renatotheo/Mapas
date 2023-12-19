@@ -63,13 +63,12 @@ class LocationForegroundService : Service() {
     private fun createNotification(): Notification {
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("Localização em segundo plano")
             .setContentText("Estamos rastreando sua localização.")
-            //.setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .build()
     }
@@ -91,8 +90,8 @@ class LocationForegroundService : Service() {
 
             val locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(5000)  // Solicitar atualizações a cada segundo
-                .setFastestInterval(5000)
+                .setInterval(5000)  // Solicitar atualizações a cada 5 segundos
+                .setFastestInterval(3000)
 
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
             Log.d("LocationForegroundService", "Location updates requested")
