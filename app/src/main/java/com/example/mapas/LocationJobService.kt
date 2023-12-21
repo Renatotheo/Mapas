@@ -1,4 +1,4 @@
-package com.example.mapas
+/*package com.example.mapas
 
 // LocationJobService.kt
 
@@ -89,3 +89,6 @@ class LocationJobService : JobService() {
         sendBroadcast(intent)
     }
 }
+
+ */
+

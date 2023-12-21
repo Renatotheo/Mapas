@@ -23,6 +23,7 @@ import android.app.job.JobScheduler
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.IBinder
+import android.os.SystemClock
 import android.widget.TextView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -81,6 +82,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    //foco na localização atual do mapa ao iniciar
+    private fun focusOnCurrentLocation() {
+        if (checkLocationPermission()) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19f))
+                }
+            }
+        } else {
+            Log.e("LocationUpdate", "Permissão de localização não concedida")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -127,6 +142,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             == PackageManager.PERMISSION_GRANTED
         ) {
             map.isMyLocationEnabled = true
+            focusOnCurrentLocation() // Chama a função para centralizar no local atual
         } else {
             ActivityCompat.requestPermissions(
                 this,
@@ -179,17 +195,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun startTimer() {
         elapsedTimeInSeconds = 0
+        val startTimeMillis = SystemClock.elapsedRealtime()
+
         timerHandler.post(object : Runnable {
             override fun run() {
+                // Calcula o tempo decorrido com base no tempo atual do sistema
+                val elapsedMillis = SystemClock.elapsedRealtime() - startTimeMillis
+                elapsedTimeInSeconds = (elapsedMillis / 1000L).toInt().toLong()
+
                 // Atualiza o TextView do temporizador
-                timerTextView.text = formatElapsedTime(elapsedTimeInSeconds)
+                runOnUiThread {
+                    timerTextView.text = formatElapsedTime(elapsedTimeInSeconds)
+                }
+
                 // Incrementa o tempo decorrido
                 elapsedTimeInSeconds++
+
                 // Agenda a execução novamente após 1 segundo
                 timerHandler.postDelayed(this, 1000)
             }
         })
     }
+
 
     private fun stopTimer() {
         // Remove callbacks do Handler para parar o temporizador
