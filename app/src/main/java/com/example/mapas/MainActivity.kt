@@ -24,6 +24,9 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.IBinder
 import android.os.SystemClock
+import android.view.View
+import android.widget.GridLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -42,6 +45,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var timerHandler: Handler
     private var elapsedTimeInSeconds: Long = 0
     private var elapsedTimeSeconds = 0L
+    private lateinit var calculadoraAtividade: CalculadoraAtividade
+    private var pesoUsuario: Double = 70.0 // Peso constante para teste
+    private lateinit var containerOpcoes: GridLayout
+    private lateinit var containerPauseFinalizar: GridLayout
 
     companion object {
         const val LOCATION_UPDATE_ACTION = "com.example.mapas.LOCATION_UPDATE"
@@ -109,18 +116,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Inicialize o manipulador do temporizador
         timerHandler = Handler(Looper.getMainLooper())
 
+        // Inicialize a calculadora com o peso do usuário
+        calculadoraAtividade = CalculadoraAtividade(pesoUsuario)
+
+        //Incialização oculta do container containerPauseFinalizar
+        containerOpcoes = findViewById(R.id.containeropcoes)
+        containerPauseFinalizar = findViewById(R.id.containerPauseFinalizar)
+        containerPauseFinalizar.visibility = View.GONE // Inicialmente oculto
+
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         locationServiceIntent = Intent(this, LocationForegroundService::class.java)
 
-        val startStopButton: Button = findViewById(R.id.startButton)
-        startStopButton.setOnClickListener {
-            toggleTracking()
+        val btnIniciarAtividade: Button = findViewById(R.id.bntIniciarAtividade)
+        btnIniciarAtividade.setOnClickListener {
+            startTracking()
+        }
 
-            // Atualizar o texto do botão com base no estado atual
-            startStopButton.text = if (isTracking) "Finalizar Atividade" else "Iniciar Atividade"
+
+        val btnFinalizarAtividade: Button = findViewById(R.id.btnFinalizarAtividade)
+        btnFinalizarAtividade.setOnClickListener {
+            stopTracking()
         }
 
         // Registra o receiver para receber atualizações de localização do serviço
@@ -152,16 +170,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun toggleTracking() {
+    //Essa função serve para gerenciar o estado do botão quando utilizar um único botão;
+
+    /*private fun toggleTracking() {
         if (isTracking) {
             stopTracking()
         } else {
             startTracking()
         }
-    }
+    }*/
 
     private fun startTracking() {
         isTracking = true
+
+
+        // Oculta o containerOpcoes original e exibe o containerPauseFinalizar
+        containerOpcoes.visibility = View.GONE
+        containerPauseFinalizar.visibility = View.VISIBLE
+
+        // Oculta o botão startStopButton
+        findViewById<Button>(R.id.bntIniciarAtividade)?.visibility = View.GONE
 
         // Limpa a polilinha anterior
         pathPoints.clear()
@@ -179,11 +207,27 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Inicia o temporizador
         startTimer()
 
+        // Atualiza as métricas periodicamente
+        timerHandler.post(object : Runnable {
+            override fun run() {
+                updateActivityMetrics()
+                timerHandler.postDelayed(this, 1000)
+            }
+        })
+
         Log.d("LocationUpdate", "Tracking Started")
     }
 
     private fun stopTracking() {
         isTracking = false
+
+        // Oculta o containerPauseFinalizar e exibe o containerOpcoes original
+        containerPauseFinalizar.visibility = View.GONE
+        containerOpcoes.visibility = View.VISIBLE
+
+        // Exibe o botão startStopButton
+        findViewById<Button>(R.id.bntIniciarAtividade)?.visibility = View.VISIBLE
+
         // Desvincula o serviço em primeiro plano
         unbindService(locationServiceConnection)
         // Para o serviço em primeiro plano
@@ -217,6 +261,36 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         })
     }
 
+    private fun updateActivityMetrics() {
+        val velocidadeMedia = calcularVelocidadeMedia() // Implemente a lógica para calcular a velocidade média
+        val tempoDecorrido = elapsedTimeInSeconds
+
+        // Calcula e atualiza as métricas
+        val calorias = calculadoraAtividade.calcularCalorias(velocidadeMedia, tempoDecorrido)
+        val distancia = updateDistance()
+        val ritmo = calculadoraAtividade.calcularRitmo(tempoDecorrido, distancia)
+
+        // Formata os valores para duas casas decimais
+        val formattedCalorias = String.format("%.2f", calorias)
+        val formattedDistancia = String.format("%.2f", distancia)
+        val formattedRitmo = String.format("%.2f", ritmo)
+
+        // Atualiza os TextViews
+        updateTextView(R.id.valorcalorias, formattedCalorias)
+        updateTextView(R.id.valordistancia, formattedDistancia)
+        updateTextView(R.id.valorritmo, formattedRitmo)
+    }
+
+    private fun updateTextView(textViewId: Int, value: String) {
+        findViewById<TextView>(textViewId)?.text = value
+    }
+
+    private fun calcularVelocidadeMedia(): Double {
+        // Implemente a lógica para calcular a velocidade média com base na rota
+        // Retorna um valor de exemplo, substitua pela lógica real
+        return 10.0
+    }
+
 
     private fun stopTimer() {
         // Remove callbacks do Handler para parar o temporizador
@@ -244,6 +318,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Polyline com as configurações
         map.addPolyline(PolylineOptions().addAll(pathPoints).color(Color.RED).width(15f))
         Log.d("LocationUpdate", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+
+        // Atualiza a distância em tempo real
+        updateDistance()
+    }
+
+    private fun updateDistance(): Double {
+        var distancia = 0.0
+        if (pathPoints.size >= 2) {
+            val lastTwoPoints = pathPoints.takeLast(2)
+            distancia = calculateDistance(lastTwoPoints[0], lastTwoPoints[1])
+            calculadoraAtividade.adicionarDistancia(distancia)
+        }
+        return distancia
+    }
+
+    private fun calculateDistance(point1: LatLng, point2: LatLng): Double {
+        val result = FloatArray(1)
+        Location.distanceBetween(
+            point1.latitude, point1.longitude,
+            point2.latitude, point2.longitude, result
+        )
+        return result[0].toDouble()
     }
 
     private fun checkLocationPermission(): Boolean {
