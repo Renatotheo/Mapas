@@ -135,6 +135,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             startTracking()
         }
 
+        val btnPauseContinuarAtividade: Button = findViewById(R.id.btnPauseContinuarAtividade)
+        btnPauseContinuarAtividade.setOnClickListener {
+            toggleTracking()
+
+            // Atualizar o texto do botão com base no estado atual
+            btnPauseContinuarAtividade.text = if (isTracking) "Pausar Atividade" else "Continuar Atividade"
+        }
+
 
         val btnFinalizarAtividade: Button = findViewById(R.id.btnFinalizarAtividade)
         btnFinalizarAtividade.setOnClickListener {
@@ -171,14 +179,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     //Essa função serve para gerenciar o estado do botão quando utilizar um único botão;
-
-    /*private fun toggleTracking() {
+    private fun toggleTracking() {
         if (isTracking) {
-            stopTracking()
+            pauseTracking()
         } else {
-            startTracking()
+            continueTracking()
         }
-    }*/
+    }
+
+    private fun pauseTracking() {
+        // Lógica para pausar a atividade
+
+        isTracking = false
+    }
+
+    private fun continueTracking() {
+        // Lógica para continuar a atividade
+
+        isTracking = true
+    }
 
     private fun startTracking() {
         isTracking = true
@@ -349,6 +368,5 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
-
 
 
