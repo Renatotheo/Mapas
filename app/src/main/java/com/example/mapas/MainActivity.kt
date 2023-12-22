@@ -49,6 +49,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var pesoUsuario: Double = 70.0 // Peso constante para teste
     private lateinit var containerOpcoes: GridLayout
     private lateinit var containerPauseFinalizar: GridLayout
+    private var tempoDecorridoMillis: Long = 0
+    private var startTimeMillis: Long = 0
+    private lateinit var btnPauseContinuarAtividade: Button
+
 
     companion object {
         const val LOCATION_UPDATE_ACTION = "com.example.mapas.LOCATION_UPDATE"
@@ -124,6 +128,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         containerPauseFinalizar = findViewById(R.id.containerPauseFinalizar)
         containerPauseFinalizar.visibility = View.GONE // Inicialmente oculto
 
+        // Inicializa o botão de pausa/continuar
+        btnPauseContinuarAtividade = findViewById(R.id.btnPauseContinuarAtividade)
+
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -133,6 +140,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val btnIniciarAtividade: Button = findViewById(R.id.bntIniciarAtividade)
         btnIniciarAtividade.setOnClickListener {
             startTracking()
+            // Configura o estado inicial do btnPauseContinuarAtividade
+            setPauseContinueButtonInitialState()
+
         }
 
         val btnPauseContinuarAtividade: Button = findViewById(R.id.btnPauseContinuarAtividade)
@@ -191,17 +201,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Lógica para pausar a atividade
 
         isTracking = false
+        stopTimer()
+        tempoDecorridoMillis = SystemClock.elapsedRealtime() - startTimeMillis
     }
 
     private fun continueTracking() {
         // Lógica para continuar a atividade
 
         isTracking = true
+        startTimer()
+        startTimeMillis = SystemClock.elapsedRealtime() - tempoDecorridoMillis
+        resumeElapsedTime()
+    }
+
+    private fun resumeElapsedTime() {
+        // Reinicia o temporizador
+        timerHandler.post(object : Runnable {
+            override fun run() {
+                // Calcula o tempo decorrido com base no tempo armazenado
+                tempoDecorridoMillis = SystemClock.elapsedRealtime() - startTimeMillis
+
+                // Atualiza o TextView do temporizador
+                runOnUiThread {
+                    timerTextView.text = formatElapsedTime(tempoDecorridoMillis / 1000)
+                }
+
+                // Agenda a execução novamente após 1 segundo
+                timerHandler.postDelayed(this, 1000)
+            }
+        })
+    }
+
+    private fun setPauseContinueButtonInitialState() {
+        btnPauseContinuarAtividade.text = "Pausar Atividade"
     }
 
     private fun startTracking() {
         isTracking = true
-
 
         // Oculta o containerOpcoes original e exibe o containerPauseFinalizar
         containerOpcoes.visibility = View.GONE
@@ -218,13 +254,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         elapsedTimeSeconds = 0L
         updateTimerText()
 
+        // Reinicia as variáveis associadas ao rastreamento
+        tempoDecorridoMillis = 0L
+        startTimeMillis = SystemClock.elapsedRealtime()
+
         // Inicia o serviço em primeiro plano
         startService(locationServiceIntent)
         // Vincula o serviço em primeiro plano
         bindService(locationServiceIntent, locationServiceConnection, Context.BIND_AUTO_CREATE)
 
-        // Inicia o temporizador
-        startTimer()
+        if (tempoDecorridoMillis > 0) {
+            // Se a corrida está sendo retomada, chama a função para continuar o temporizador
+            resumeElapsedTime()
+        } else {
+            // Se é uma nova corrida, inicia o temporizador do zero
+            startTimeMillis = SystemClock.elapsedRealtime()
+            startTimer()
+        }
 
         // Atualiza as métricas periodicamente
         timerHandler.post(object : Runnable {
@@ -236,6 +282,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         Log.d("LocationUpdate", "Tracking Started")
     }
+
 
     private fun stopTracking() {
         isTracking = false
@@ -368,5 +415,4 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
-
 
