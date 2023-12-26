@@ -114,11 +114,11 @@ class LocationForegroundService : Service() {
     }
 
     private fun sendLocationToActivity(location: Location) {
-        val intent = Intent(MainActivity.LOCATION_UPDATE_ACTION)
+        val intent = Intent(AtividadeFragment.LOCATION_UPDATE_ACTION)
         val bundle = Bundle()
         val latLng = Location(location)
         bundle.putParcelable("location", latLng)
-        intent.putExtra(MainActivity.RESULT_RECEIVER, ResultReceiver(null).apply {
+        intent.putExtra(AtividadeFragment.RESULT_RECEIVER, ResultReceiver(null).apply {
             send(0, bundle)
         })
         sendBroadcast(intent)

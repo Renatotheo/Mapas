@@ -1,0 +1,444 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+
+    <!-- Seu LinearLayout amarelo claro acima do LinearLayout verde -->
+    <LinearLayout
+        android:id="@+id/containertempo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:background="#FFFF99"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/atributosecundario"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintHeight_percent="0.16">
+
+        <!-- Seu TextView para o temporizador -->
+        <TextView
+            android:id="@+id/timerTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="1dp"
+            android:text="00:00"
+            android:textSize="70sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_marginTop="0dp"/>
+
+        <TextView
+            android:id="@+id/titulotempo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tempo"
+            android:textSize="30sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:padding="1dp"
+            android:layout_marginBottom="2dp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/atributosecundario"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:elevation="8dp"
+        android:padding="1dp"
+        android:background="#FF0000"
+        app:layout_constraintTop_toBottomOf="@+id/containertempo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintHeight_percent="0.1">
+
+        <!-- Primeiro conjunto de texto e título -->
+        <LinearLayout
+            android:id="@+id/calorias"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="1dp">
+
+            <TextView
+
+                android:id="@+id/valorcalorias"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:01"
+                android:textSize="35sp"
+                android:padding="1dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+
+                android:id="@+id/titulocalorias"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Calorias"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:padding="1dp"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+
+        <!-- Segundo conjunto de texto e título -->
+        <LinearLayout
+            android:id="@+id/distancia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="1dp">
+
+            <TextView
+
+                android:id="@+id/valordistancia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:02"
+                android:textSize="35sp"
+                android:padding="1dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+
+                android:id="@+id/titulodistancia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Km"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:padding="1dp"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+
+        <!-- Terceiro conjunto de texto e título -->
+        <LinearLayout
+            android:id="@+id/ritmo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="1dp">
+
+            <TextView
+
+                android:id="@+id/valorritmo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:03"
+                android:textSize="35sp"
+                android:padding="1dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+
+                android:id="@+id/tituloritmo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ritmo"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:padding="1dp"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+
+    <!-- Fragment (Map) -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/atributosecundario"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/containerGrupo"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintHeight_percent="0.54" />
+
+
+    <LinearLayout
+        android:id="@+id/containerGrupo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/map"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintHeight_percent="0.2">
+
+
+
+        <GridLayout
+            android:id="@+id/containeropcoes"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#87CEFA"
+            android:columnCount="2"
+            android:rowCount="2"
+            android:elevation="8dp">
+
+            <!-- Opção 1 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/gridItem1"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_gravity="fill"
+                android:layout_margin="0dp"
+                android:background="#FFFF99">
+
+                <!-- Ícone no canto esquerdo -->
+                <ImageView
+                    android:id="@+id/modalidadeimg"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/titlemodalidade"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Modalidade"
+                    android:textSize="14sp"
+                    android:textColor="#555555"
+                    app:layout_constraintStart_toEndOf="@id/modalidadeimg"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Subtítulo -->
+                <TextView
+                    android:id="@+id/subtitlemodalidade"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Selecione"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toEndOf="@id/modalidadeimg"
+                    app:layout_constraintTop_toBottomOf="@id/titlemodalidade"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Opção 2 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/gridItem2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_gravity="fill"
+                android:layout_margin="0dp"
+                android:background="#FFCCCC">
+
+                <!-- Ícone no canto esquerdo -->
+                <ImageView
+                    android:id="@+id/equipeimg"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/titleequipe"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Equipe"
+                    android:textSize="14sp"
+                    android:textColor="#555555"
+                    app:layout_constraintStart_toEndOf="@id/equipeimg"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Subtítulo -->
+                <TextView
+                    android:id="@+id/subtitleequipe"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Convidar"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toEndOf="@id/equipeimg"
+                    app:layout_constraintTop_toBottomOf="@id/titleequipe"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Opção 3 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/gridItem3"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_gravity="fill"
+                android:layout_margin="0dp"
+                android:background="#8FED8F">
+
+                <!-- Ícone no canto esquerdo -->
+                <ImageView
+                    android:id="@+id/musicaimg"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/titlemusica"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Música"
+                    android:textSize="14sp"
+                    android:textColor="#555555"
+                    app:layout_constraintStart_toEndOf="@id/musicaimg"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Subtítulo -->
+                <TextView
+                    android:id="@+id/subtitlemusica"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Selecione"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toEndOf="@id/musicaimg"
+                    app:layout_constraintTop_toBottomOf="@id/titlemusica"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Opção 4 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/gridItem4"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_gravity="fill"
+                android:layout_margin="0dp"
+                android:background="#FFD700">
+
+                <!-- Ícone no canto esquerdo -->
+                <ImageView
+                    android:id="@+id/compartilharimg"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Título -->
+                <TextView
+                    android:id="@+id/titlecompartilhar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Compartilhar"
+                    android:textSize="14sp"
+                    android:textColor="#555555"
+                    app:layout_constraintStart_toEndOf="@id/compartilharimg"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- Subtítulo -->
+                <TextView
+                    android:id="@+id/subtitleOption4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Treino"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toEndOf="@id/compartilharimg"
+                    app:layout_constraintTop_toBottomOf="@id/titlecompartilhar"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </GridLayout>
+
+        <GridLayout
+            android:id="@+id/containerPauseFinalizar"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#800080"
+            android:columnCount="2"
+            android:rowCount="2"
+            android:elevation="8dp"
+            android:visibility="gone">
+
+
+            <!-- Botão para finalizar atividade -->
+            <Button
+                android:id="@+id/btnFinalizarAtividade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Finalizar Atividade"
+                android:layout_columnSpan="2"
+                android:layout_gravity="fill"
+                android:layout_rowWeight="1"
+                android:layout_columnWeight="1"/>
+
+            <!-- Botão para pausar/continuar atividade -->
+            <Button
+                android:id="@+id/btnPauseContinuarAtividade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pausar Atividade"
+                android:layout_columnSpan="2"
+                android:layout_gravity="fill"
+                android:layout_rowWeight="1"
+                android:layout_columnWeight="1"/>
+
+        </GridLayout>
+
+
+
+        <Button
+            android:id="@+id/bntIniciarAtividade"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Iniciar Atividade"
+            app:iconTint="#FFC107" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
