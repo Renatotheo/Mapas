@@ -50,6 +50,9 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
     private var tempoDecorridoMillis: Long = 0
     private var startTimeMillis: Long = 0
     private lateinit var btnPauseContinuarAtividade: Button
+    private val MIN_DISTANCE_CHANGE_FOR_UPDATE = 10f // Ajuste conforme necessário
+    private val MIN_ANGLE_CHANGE_FOR_UPDATE = 10f // Ajuste conforme necessário
+    private var previousLocation: Location? = null
 
 
     companion object {
@@ -109,6 +112,7 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("AtividadeFragment", "onCreateView chamado")
         // Infla o layout do fragmento
         val rootView = inflater.inflate(R.layout.fragment_atividade, container, false)
 
@@ -143,6 +147,7 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
 
         val btnIniciarAtividade: Button = rootView.findViewById(R.id.bntIniciarAtividade)
         btnIniciarAtividade.setOnClickListener {
+            Log.d("AtividadeFragment", "Botão Iniciar Pressionado")
             startTracking()
             // Configura o estado inicial do btnPauseContinuarAtividade
             setPauseContinueButtonInitialState()
@@ -385,16 +390,46 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateLocation(location: Location) {
-        val latLng = LatLng(location.latitude, location.longitude)
-        map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-        pathPoints.add(latLng)
+        // Verifica se a distância ou o ângulo mudaram o suficiente para justificar a atualização
+        if (shouldUpdateLocation(location)) {
+            val latLng = LatLng(location.latitude, location.longitude)
+            map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+            pathPoints.add(latLng)
 
-        // Polyline com as configurações
-        map.addPolyline(PolylineOptions().addAll(pathPoints).color(Color.RED).width(15f))
-        Log.d("LocationUpdate", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+            // Polyline com as configurações
+            map.addPolyline(PolylineOptions().addAll(pathPoints).color(Color.RED).width(15f))
+            Log.d("LocationUpdate", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
-        // Atualiza a distância em tempo real
-        updateDistance()
+            // Atualiza a distância em tempo real
+            updateDistance()
+
+            // Atualiza a localização anterior
+            previousLocation = location
+        }
+    }
+
+    private fun shouldUpdateLocation(location: Location): Boolean {
+        if (previousLocation == null) {
+            // Primeira atualização, sempre atualiza
+            return true
+        }
+
+        // Calcula a distância entre as localizações
+        val distance = previousLocation?.let { location.distanceTo(it) } ?: 0f
+
+        // Calcula a diferença de ângulo entre as direções das localizações
+        val angleChange = previousLocation?.let { calculateAngleChange(location, it) } ?: 0f
+
+        // Atualiza se a distância ou o ângulo mudaram o suficiente
+        return distance >= MIN_DISTANCE_CHANGE_FOR_UPDATE || angleChange >= MIN_ANGLE_CHANGE_FOR_UPDATE
+    }
+
+
+
+    private fun calculateAngleChange(newLocation: Location, oldLocation: Location): Float {
+        val bearing1 = newLocation.bearingTo(oldLocation)
+        val bearing2 = oldLocation.bearingTo(newLocation)
+        return Math.abs(bearing1 - bearing2)
     }
 
     private fun updateDistance(): Double {
