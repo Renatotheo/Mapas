@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import android.Manifest
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.IBinder
@@ -22,9 +23,12 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.PolylineOptions
@@ -314,7 +318,47 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
 
         // Para o temporizador
         stopTimer()
+
+        // Constrói e exibe o AlertDialog
+        val alertDialogBuilder = AlertDialog.Builder(requireContext())
+        alertDialogBuilder.setTitle("Confirmação")
+        alertDialogBuilder.setMessage("Deseja finalizar a atividade?")
+        alertDialogBuilder.setPositiveButton("Finalizar") { _, _ ->
+            // Código para finalizar a atividade
+            Log.d("LocationUpdate", "Chamando showSummaryLayout")
+            showSummaryLayout()
+        }
+        alertDialogBuilder.setNegativeButton("Cancelar") { dialog, _ ->
+            // Código para cancelar a ação
+            dialog.dismiss()
+        }
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+        Log.d("LocationUpdate", "Após mostrar o AlertDialog")
     }
+
+    private fun showSummaryLayout() {
+        // Cria um novo ResultadoTreinoDialogFragment
+        val dialogFragment = ResultadoTreinoDialogFragment()
+
+        // Passe os resultados como argumentos
+        val arguments = Bundle().apply {
+            putString("tempo", timerTextView.text.toString())
+            // Adicione outros resultados conforme necessário
+        }
+        dialogFragment.arguments = arguments
+
+        // Exibe o ResultadoTreinoDialogFragment
+        dialogFragment.show(requireFragmentManager(), "resultado_treino_dialog")
+    }
+
+
+
+
+
+
+
+
 
     private fun startTimer() {
         elapsedTimeInSeconds = 0
