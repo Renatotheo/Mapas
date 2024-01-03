@@ -1,75 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- TextViews para exibir informações do treino -->
+    <!-- TextView para exibir o título -->
     <TextView
-        android:id="@+id/summaryTempo"
-        android:layout_width="0dp"
+        android:id="@+id/textTitulo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tempo: "
-        app:layout_constraintTop_toTopOf="parent"
+        android:text="Resumo"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/summaryCalorias"
+    <!-- LinearLayout para encapsular Tempo e Calorias -->
+    <LinearLayout
+        android:id="@+id/linearTempoCalorias"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Calorias: "
-        app:layout_constraintTop_toBottomOf="@+id/summaryTempo"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/imageMapa"
+        app:layout_constraintEnd_toStartOf="@+id/linearDistanciaRitmo"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/textTitulo">
 
-    <TextView
-        android:id="@+id/summaryDistancia"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Distância: "
-        app:layout_constraintTop_toBottomOf="@+id/summaryCalorias"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <TextView
+            android:id="@+id/summaryTempo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:text="Tempo: " />
 
-    <TextView
-        android:id="@+id/summaryRitmo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Ritmo: "
-        app:layout_constraintTop_toBottomOf="@+id/summaryDistancia"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <TextView
+            android:id="@+id/summaryCalorias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:text="Calorias: " />
+    </LinearLayout>
 
-    <!-- Botões para salvar, excluir e fechar -->
-    <Button
-        android:id="@+id/btnSave"
-        android:layout_width="0dp"
+    <!-- LinearLayout para encapsular Distância e Ritmo -->
+
+    <!-- ImageView para exibir o snapshot -->
+
+    <!-- Botões para excluir e fechar -->
+
+    <LinearLayout
+        android:id="@+id/linearDistanciaRitmo"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
-        android:text="Salvar"
-        app:layout_constraintTop_toBottomOf="@+id/summaryRitmo"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="4dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textTitulo">
+
+        <TextView
+            android:id="@+id/summaryDistancia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:text="Distância: " />
+
+        <TextView
+            android:id="@+id/summaryRitmo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:text="Ritmo: " />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageMapa"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="52dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/linearDistanciaRitmo" />
 
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Excluir"
-        app:layout_constraintTop_toBottomOf="@+id/btnSave"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/imageMapa" />
 
     <Button
         android:id="@+id/btnFechar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Fechar"
-        app:layout_constraintTop_toBottomOf="@+id/btnDelete"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/btnDelete" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

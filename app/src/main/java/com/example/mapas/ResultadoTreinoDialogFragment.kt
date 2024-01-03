@@ -11,6 +11,8 @@ import androidx.fragment.app.DialogFragment
 
 class ResultadoTreinoDialogFragment : DialogFragment() {
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,6 +37,9 @@ class ResultadoTreinoDialogFragment : DialogFragment() {
         btnFechar.setOnClickListener {
             dismiss() // Fecha o DialogFragment
         }
+
+        // Impede o fechamento ao tocar fora do dialog
+        dialog?.setCanceledOnTouchOutside(false)
 
         return summaryLayout
     }

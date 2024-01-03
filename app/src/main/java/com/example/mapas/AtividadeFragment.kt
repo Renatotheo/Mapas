@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.GridLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -44,6 +45,9 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var location: Location
     private lateinit var timerTextView: TextView
+    private var valorCalorias: String = ""
+    private var valorDistancia: String = ""
+    private var valorRitmo: String = ""
     private lateinit var timerHandler: Handler
     private var elapsedTimeInSeconds: Long = 0
     private var elapsedTimeSeconds = 0L
@@ -326,6 +330,7 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
         alertDialogBuilder.setPositiveButton("Finalizar") { _, _ ->
             // Código para finalizar a atividade
             Log.d("LocationUpdate", "Chamando showSummaryLayout")
+
             showSummaryLayout()
         }
         alertDialogBuilder.setNegativeButton("Cancelar") { dialog, _ ->
@@ -344,20 +349,29 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
         // Passe os resultados como argumentos
         val arguments = Bundle().apply {
             putString("tempo", timerTextView.text.toString())
-            // Adicione outros resultados conforme necessário
+            putString("calorias", valorCalorias)
+            putString("distancia", valorDistancia)
+            putString("ritmo", valorRitmo)
         }
         dialogFragment.arguments = arguments
 
         // Exibe o ResultadoTreinoDialogFragment
         dialogFragment.show(requireFragmentManager(), "resultado_treino_dialog")
+
+        // Captura o Snapshot do mapa
+        captureMapSnapshot(dialogFragment)
     }
 
+    private fun captureMapSnapshot(dialogFragment: ResultadoTreinoDialogFragment) {
+        val callback = GoogleMap.SnapshotReadyCallback { snapshot ->
+            // Carrega o snapshot no ImageView
+            val imageMapa = dialogFragment.dialog?.findViewById<ImageView>(R.id.imageMapa)
+            imageMapa?.setImageBitmap(snapshot)
+        }
 
-
-
-
-
-
+        // Substitua YOUR_GOOGLE_MAPS_API_KEY pela sua chave de API do Google Maps
+        map.snapshot(callback)
+    }
 
 
     private fun startTimer() {
@@ -385,7 +399,7 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun updateActivityMetrics() {
-        val velocidadeMedia = calcularVelocidadeMedia() // Implemente a lógica para calcular a velocidade média
+        val velocidadeMedia = calcularVelocidadeMedia() // Implementar a lógica para calcular a velocidade média
         val tempoDecorrido = elapsedTimeInSeconds
 
         // Calcula e atualiza as métricas
@@ -397,6 +411,11 @@ class AtividadeFragment : Fragment(), OnMapReadyCallback {
         val formattedCalorias = String.format("%.2f", calorias)
         val formattedDistancia = String.format("%.2f", distancia)
         val formattedRitmo = String.format("%.2f", ritmo)
+
+        // Atualiza as variáveis globais
+        valorCalorias = formattedCalorias
+        valorDistancia = formattedDistancia
+        valorRitmo = formattedRitmo
 
         // Atualiza os TextViews
         updateTextView(R.id.valorcalorias, formattedCalorias)

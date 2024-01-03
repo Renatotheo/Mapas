@@ -3,6 +3,7 @@ package com.example.mapas
 // MainActivity.kt
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -17,4 +18,5 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
     }
+
 }
